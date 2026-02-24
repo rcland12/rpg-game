@@ -39,10 +39,10 @@ export default class LevelScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.audio('collect', 'audio/collect.ogg')
-    this.load.audio('hit', 'audio/hit.ogg')
-    this.load.audio('ambience', 'audio/ambience.ogg')
-    this.load.audio('levelup', 'audio/levelup.ogg')
+    this.load.audio('collect', 'audio/collect.wav')
+    this.load.audio('hit', 'audio/hit.wav')
+    this.load.audio('ambience', 'audio/ambience.wav')
+    this.load.audio('levelup', 'audio/levelup.wav')
     this.load.image('bg-aurora', 'assets/bg-aurora.jpg')
     this.load.image('bg-galaxy', 'assets/bg-galaxy.jpg')
     this.load.image('bg-city', 'assets/bg-city.jpg')
@@ -59,6 +59,7 @@ export default class LevelScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(level.bgColor)
     this.physics.world.setBounds(0, 0, 960, 640)
 
+    this.prepareAudioUnlock()
     this.sound.stopByKey('ambience')
     this.collectSound = this.sound.add('collect', { volume: 0.6 })
     this.hitSound = this.sound.add('hit', { volume: 0.7 })
@@ -171,6 +172,16 @@ export default class LevelScene extends Phaser.Scene {
         .setAlpha(0.85 - index * 0.1)
       this.parallaxLayers.push({ image: layer, speed: 0.02 + index * 0.01 })
     })
+  }
+
+  private prepareAudioUnlock() {
+    const resumeAudio = () => {
+      if ('context' in this.sound && this.sound.context.state === 'suspended') {
+        this.sound.context.resume().catch(() => {})
+      }
+    }
+    this.input.once('pointerdown', resumeAudio)
+    this.input.keyboard?.once('keydown', resumeAudio)
   }
 
   private handlePlayerMovement() {
